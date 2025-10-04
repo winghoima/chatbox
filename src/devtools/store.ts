@@ -76,6 +76,20 @@ export async function readSessions(): Promise<Session[]> {
     if (sessions.length === 0) {
         return [createSession()]
     }
+    
+    // Check if "My First Chat" exists, if not add it to the front
+    const myFirstChatExists = sessions.some(session => session.id === 'my-first-chat-001')
+    if (!myFirstChatExists) {
+        const myFirstChat = {
+            "id": "my-first-chat-001",
+            "name": "My First Chat",
+            "messages": []
+        }
+        sessions = [myFirstChat, ...sessions]
+        // Save the updated sessions to storage
+        await writeSessions(sessions)
+    }
+    
     return sessions
 }
 
