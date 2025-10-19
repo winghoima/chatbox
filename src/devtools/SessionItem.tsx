@@ -20,15 +20,20 @@ const { useState } = React
 export interface Props {
     session: Session
     selected: boolean
+    index: number
     switchMe: () => void
     deleteMe: () => void
     copyMe: () => void
     editMe: () => void
+    reorderSession: (fromIndex: number, toIndex: number) => void
 }
 
 export default function SessionItem(props: Props) {
-    const { session, selected, switchMe, deleteMe, copyMe, editMe } = props
+    const { session, selected, switchMe, deleteMe, copyMe, editMe, index, reorderSession } = props
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const [isDragOver, setIsDragOver] = useState(false);
+
     const open = Boolean(anchorEl);
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
         event.preventDefault()
@@ -38,11 +43,59 @@ export default function SessionItem(props: Props) {
         setAnchorEl(null);
     };
 
+    const handleDragStart = (e: React.DragEvent) => {
+        setIsDragging(true);
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', index.toString());
+    };
+
+    const handleDragEnd = () => {
+        setIsDragging(false);
+    };
+
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+    };
+
+    const handleDragEnter = () => {
+        setIsDragOver(true);
+    };
+
+    const handleDragLeave = () => {
+        setIsDragOver(false);
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragOver(false);
+        const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+        if (fromIndex !== index) {
+            reorderSession(fromIndex, index);
+        }
+    };
+
     return (
         <MenuItem
             key={session.id}
             selected={selected}
             onClick={() => switchMe()}
+            draggable
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragOver={handleDragOver}
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            sx={{
+                opacity: isDragging ? 0.5 : 1,
+                borderTop: isDragOver ? '2px solid #1976d2' : 'none',
+                transition: 'opacity 0.2s ease',
+                cursor: 'grab',
+                '&:active': {
+                    cursor: 'grabbing',
+                },
+            }}
         >
             <ListItemIcon>
                 <IconButton><ChatBubbleOutlineOutlinedIcon fontSize="small" /></IconButton>

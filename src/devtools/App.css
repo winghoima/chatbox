@@ -50,3 +50,14 @@
   width: 14px;
   height: 14px;
 }
+
+/* Drag and Drop Session Styling */
+.session-item-dragging {
+  opacity: 0.5;
+  cursor: grabbing !important;
+}
+
+.session-item-drag-over {
+  border-top: 2px solid #1976d2;
+  background-color: rgba(25, 118, 210, 0.08);
+}
