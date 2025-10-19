@@ -196,6 +196,7 @@ function Main() {
                                 store.chatSessions.map((session, ix) => (
                                     <SessionItem selected={store.currentSession.id === session.id}
                                         session={session}
+                                        index={ix}
                                         switchMe={() => {
                                             store.switchCurrentSession(session)
                                             document.getElementById('message-input')?.focus() // better way?
@@ -207,6 +208,7 @@ function Main() {
                                             store.createChatSession(newSession, ix)
                                         }}
                                         editMe={() => setConfigureChatConfig(session)}
+                                        reorderSession={store.reorderSessions}
                                     />
                                 ))
                             }
