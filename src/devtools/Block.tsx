@@ -39,7 +39,17 @@ const md = new MarkdownIt({
         } else {
             content = md.utils.escapeHtml(str)
         }
-        return `<pre class="hljs" style="max-width: 50vw; overflow: auto"><code>${content}</code></pre>`;
+        const escapedCode = md.utils.escapeHtml(str)
+        return `<div class="code-block-wrapper">
+            <button class="code-copy-btn" data-code="${escapedCode}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                Copy
+            </button>
+            <pre class="hljs" style="max-width: 50vw; overflow: auto"><code>${content}</code></pre>
+        </div>`;
     }
 });
 md.use(mdKatex, { blockClass: 'katexmath-block rounded-md p-[10px]', errorColor: ' #cc0000' })
@@ -65,6 +75,7 @@ function _Block(props: Props) {
     const { msg, setMsg } = props
     const [isHovering, setIsHovering] = useState(false)
     const [isEditing, setIsEditing] = useState(false)
+    const contentRef = useRef<HTMLDivElement>(null)
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
@@ -74,6 +85,42 @@ function _Block(props: Props) {
     const handleClose = () => {
         setAnchorEl(null);
     };
+
+    useEffect(() => {
+        if (!contentRef.current) return
+
+        const handleCopyClick = (e: Event) => {
+            const button = e.currentTarget as HTMLButtonElement
+            const code = button.getAttribute('data-code')
+            if (!code) return
+
+            navigator.clipboard.writeText(code).then(() => {
+                const originalText = button.innerHTML
+                button.classList.add('copied')
+                button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>Copied!`
+
+                setTimeout(() => {
+                    button.classList.remove('copied')
+                    button.innerHTML = originalText
+                }, 2000)
+            }).catch(err => {
+                console.error('Failed to copy:', err)
+            })
+        }
+
+        const copyButtons = contentRef.current.querySelectorAll('.code-copy-btn')
+        copyButtons.forEach(button => {
+            button.addEventListener('click', handleCopyClick)
+        })
+
+        return () => {
+            copyButtons.forEach(button => {
+                button.removeEventListener('click', handleCopyClick)
+            })
+        }
+    }, [msg.content])
 
 
     const tips: string[] = []
@@ -151,6 +198,7 @@ function _Block(props: Props) {
                                     />
                                 ) : (
                                     <Box
+                                        ref={contentRef}
                                         sx={{
                                             // bgcolor: "Background",
                                         }}
