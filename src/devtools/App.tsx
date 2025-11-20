@@ -93,6 +93,26 @@ function Main() {
 
     const [sessionToDelete, setSessionToDelete] = React.useState<Session | null>(null);
 
+    // Keyboard shortcut for new chat (Cmd+N / Ctrl+N)
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            // Check for Cmd+N (Mac) or Ctrl+N (Windows/Linux)
+            if (event.key === 'n' && (event.metaKey || event.ctrlKey) && !event.shiftKey && !event.altKey) {
+                event.preventDefault()
+                store.createEmptyChatSession()
+                // Focus the message input after creating new session
+                setTimeout(() => {
+                    document.getElementById('message-input')?.focus()
+                }, 100)
+            }
+        }
+
+        window.addEventListener('keydown', handleKeyDown)
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown)
+        }
+    }, [store])
+
     const generateName = async (session: Session) => {
         client.replay(
             store.settings.openaiKey,
@@ -227,7 +247,7 @@ function Main() {
                                 New Chat
                             </ListItemText>
                             <Typography variant="body2" color="text.secondary">
-                                {/* ⌘N */}
+                                {/(Mac|iPhone|iPod|iPad)/i.test(navigator.userAgent) ? '⌘N' : 'Ctrl+N'}
                             </Typography>
                         </MenuItem>
                         <MenuItem onClick={() => {
