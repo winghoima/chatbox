@@ -8,6 +8,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { Session } from './types'
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import EditIcon from '@mui/icons-material/Edit';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
@@ -25,11 +26,12 @@ export interface Props {
     deleteMe: () => void
     copyMe: () => void
     editMe: () => void
+    exportMe: () => void
     reorderSession: (fromIndex: number, toIndex: number) => void
 }
 
 export default function SessionItem(props: Props) {
-    const { session, selected, switchMe, deleteMe, copyMe, editMe, index, reorderSession } = props
+    const { session, selected, switchMe, deleteMe, copyMe, editMe, exportMe, index, reorderSession } = props
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [isDragOver, setIsDragOver] = useState(false);
@@ -130,6 +132,14 @@ export default function SessionItem(props: Props) {
                 }} disableRipple>
                     <FileCopyIcon fontSize='small' />
                     Copy
+                </MenuItem>
+
+                <MenuItem key={session.id + 'export'} onClick={() => {
+                    exportMe()
+                    handleClose()
+                }} disableRipple>
+                    <FileDownloadIcon fontSize='small' />
+                    Export
                 </MenuItem>
 
                 <Divider sx={{ my: 0.5 }} />

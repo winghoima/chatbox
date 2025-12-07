@@ -208,6 +208,27 @@ function Main() {
                                             store.createChatSession(newSession, ix)
                                         }}
                                         editMe={() => setConfigureChatConfig(session)}
+                                        exportMe={async () => {
+                                            const exportData = {
+                                                id: session.id,
+                                                name: session.name,
+                                                messages: session.messages.map(msg => ({
+                                                    id: msg.id,
+                                                    role: msg.role,
+                                                    content: msg.content
+                                                }))
+                                            };
+                                            const jsonString = JSON.stringify(exportData, null, 2);
+                                            const result = await (window as any).api.invoke('exportSession', {
+                                                name: session.name,
+                                                data: jsonString
+                                            });
+                                            if (result.success) {
+                                                store.addToast('Session exported successfully');
+                                            } else if (!result.canceled) {
+                                                store.addToast('Failed to export session: ' + (result.error || 'Unknown error'));
+                                            }
+                                        }}
                                         reorderSession={store.reorderSessions}
                                     />
                                 ))
